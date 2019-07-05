@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: David Little
+  description: Role to manage LVM Groups/Logical Volumes on IBM AIX.  Can be used to create, extend ~or resize~ VGs, LVs, and FSs.
+  license: MIT
+  min_ansible_version: 2.8
+  platforms:
+    - name: AIX
+      versions:
+        - 7.1
+        - 7.2
+  galaxy_tags:
+    - system
+    - aix
+dependencies: []

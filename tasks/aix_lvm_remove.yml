@@ -1,0 +1,69 @@
+---
+- block:
+  - name: manage_aix_lvm | unmounting `unmounted` and `absent` filesystem(s)
+    #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
+    aix_filesystem:
+      filesystem: "{{ item.1.fsfilesystem }}"
+      state: unmounted
+    become: true
+    with_subelements:
+      - "{{ vglist }}"
+      - lvlist
+    when: >
+          (
+            ( item.1.fsfilesystem is defined ) 
+              and
+            ( item.1.fsstate is defined 
+                and (
+                  item.1.fsstate == 'unmounted'
+                    or 
+                  item.1.fsstate == 'absent'
+                )
+            )
+          ) 
+
+  - name: manage_aix_lvm | Removing `absent` filesystem(s)
+    #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
+    aix_filesystem:
+      filesystem: "{{ item.1.fsfilesystem }}"
+      state: absent
+    become: true
+    with_subelements:
+      - "{{ vglist }}"
+      - lvlist
+    when: >
+          (
+            ( item.1.fsfilesystem is defined ) 
+              and
+            ( item.1.fsstate == 'absent' )
+          )
+
+  - name: manage_aix_lvm | removing `absent` logical volume(s)
+    # https://docs.ansible.com/ansible/latest/modules/aix_lvol_module.html#aix-lvol-module
+    aix_lvol:
+      vg: "{{ item.0.vgname }}"
+      lv: "{{ item.1.lvname }}"
+      state: absent
+    become: true
+    with_subelements:
+      - "{{ vglist }}"
+      - lvlist
+    when: >
+          (
+            ( item.1.lvstate is defined ) 
+              and
+            ( item.1.lvstate == 'absent' )
+          )
+
+  - name: manage_aix_lvm | removing `absent` AIX volume group(s)
+    # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
+    aix_lvg:
+      vg: "{{ item.vgname }}"
+      state: absent
+    become: true
+    loop: "{{ vglist }}"
+    when: >
+          (
+            item.state is defined and item.state == 'absent'
+          )  
+  tags: remove

@@ -1,0 +1,10 @@
+---
+# defaults file for ansible-manage-lvm.  Please do not change these values, use your local environment variables files instead
+lvm_groups: []
+
+# Defines if LVM will be managed by role
+# default is false to ensure nothing is changed by accident.
+manage_lvm: false
+
+default_force: False
+default_fs: jfs2
