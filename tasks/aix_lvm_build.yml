@@ -21,7 +21,7 @@
     aix_lvol:
       vg: "{{ item.0.vgname }}"
       copies: "{{ item.1.lvcopies | default( omit ) }}"
-      lv: "{{ item.1.lvname }}"    
+      lv: "{{ item.1.lvname }}"
       lv_type: "{{ item.1.lvtype | default( omit ) }}"
       opts: "{{ item.1.lvopts | default( omit ) }}"
       pvs: "{{ item.1.lvpvs | default( omit ) }}"
@@ -42,21 +42,21 @@
       filesystem: "{{ item.1.fsfilesystem }}"
       account_subsystem: "{{ item.1.fsaccount_subsystem | default( omit ) }}"
       attributes: "{{ item.1.fsattributes | default( omit ) }}"
-      auto_mount: "{{ item.1.fsauto_mount | default( omit ) }}"    
+      auto_mount: "{{ item.1.fsauto_mount | default( omit ) }}"
       fs_type: "{{ item.1.lvtype | default( omit ) }}"
       mount_group: "{{ item.1.fsmount_group | default( omit ) }}"
       permissions: "{{ item.1.fspermissions | default( omit ) }}"
       #state: "{{ item.1.fsstate | default( omit ) }}"
       # aix_filesystem code will not create a filesystem if state: mounted, it only tries to mount it.
       #  We need to first crate the FS, and then mount it... 
-      state: present 
+      state: present
     become: true
     with_subelements:
       - "{{ vglist }}"
       - lvlist
     when: >
           (
-            ( item.1.lvstate is not defined or item.1.lvstate == 'present' ) 
+            ( item.1.lvstate is not defined or item.1.lvstate == 'present' )
               and
             ( item.1.fsstate is not defined or ( item.1.fsstate == 'present' or item.1.fsstate == 'mounted' ))
           )
@@ -67,10 +67,10 @@
       filesystem: "{{ item.1.fsfilesystem }}"
       state: mounted
     become: true
-    with_subelements: 
+    with_subelements:
       - "{{ vglist }}"
       - lvlist
-    when: item.1.fsstate == 'mounted'  
+    when: item.1.fsstate == 'mounted' 
 
 # - name: manage_aix_lvm | resizing filesystem
 #   command: resize2fs /dev/{{ item[0]['vgname'] }}/{{ item[1]['lvname'] }}

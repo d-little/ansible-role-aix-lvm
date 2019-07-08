@@ -11,16 +11,16 @@
       - lvlist
     when: >
           (
-            ( item.1.fsfilesystem is defined ) 
+            ( item.1.fsfilesystem is defined )
               and
-            ( item.1.fsstate is defined 
+            ( item.1.fsstate is defined
                 and (
                   item.1.fsstate == 'unmounted'
-                    or 
+                    or
                   item.1.fsstate == 'absent'
                 )
             )
-          ) 
+          )
 
   - name: manage_aix_lvm | Removing `absent` filesystem(s)
     #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
@@ -33,7 +33,7 @@
       - lvlist
     when: >
           (
-            ( item.1.fsfilesystem is defined ) 
+            ( item.1.fsfilesystem is defined )
               and
             ( item.1.fsstate == 'absent' )
           )
@@ -50,7 +50,7 @@
       - lvlist
     when: >
           (
-            ( item.1.lvstate is defined ) 
+            ( item.1.lvstate is defined )
               and
             ( item.1.lvstate == 'absent' )
           )
@@ -65,5 +65,5 @@
     when: >
           (
             item.state is defined and item.state == 'absent'
-          )  
+          )
   tags: remove

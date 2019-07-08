@@ -7,11 +7,11 @@
       filesystem: "{{ item.1.fsfilesystem }}"
       size: "{{ item.1.lvsize }}"
     become: true
-    with_subelements: 
+    with_subelements:
       - "{{ vglist }}"
       - lvlist
     when: >
-          ( 
+          (
             item.1.fsstate == 'mounted'
           and
             (
