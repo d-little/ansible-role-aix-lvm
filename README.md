@@ -1,6 +1,8 @@
-# Role Name
+# ansible-role-aix-lvm
 
-An [Ansible] role to manage Volume Groups/Logical Volumes/Filesystems on AIX Servers.  It is currently designed to primarily build out and create new environments, while it is possible extend individual filesystems, it's not best suited for that job.  It excels at taking a bunch of PVs and defining all of the VGs, LVs, and FSs on the target host. This role was based off the excellent [ansible-manage-lvm](https://github.com/mrlesmithjr/ansible-manage-lvm) role from [@mrlesmithjr](https://github.com/mrlesmithjr/)
+**Notice**: This role is undergoing heavy construction.  Not recommended for production use just yet.
+
+An [Ansible](https://github.com/ansible/ansible) role to manage Volume Groups/Logical Volumes/Filesystems on AIX Servers.  It is currently designed to primarily build out and create new environments, while it is possible extend individual filesystems, it's not best suited for that job.  It excels at taking a bunch of PVs and defining all of the VGs, LVs, and FSs on the target host. This role was based off the excellent [ansible-manage-lvm](https://github.com/mrlesmithjr/ansible-manage-lvm) role from [@mrlesmithjr](https://github.com/mrlesmithjr/)
 
 **NOTE**:
 

@@ -21,7 +21,6 @@
             )
           )
 
-
   # - name: manage_aix_lvm | resizing swap
   #   shell: "swapoff -a && mkswap /dev/{{ item[0]['vgname'] }}/{{ item[1]['lvname'] }} && swapon -va"
   #   become: true
