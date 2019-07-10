@@ -1,19 +1,23 @@
 ---
 # tasks file for ansible-manage-aix-lvm
-- include: aix_lvm_build.yml
+- include_tasks: aix_lvm_build.yml
   tags: build
-  when: >
-    manage_lvm and
-    vglist is defined
+  when:
+    - manage_lvm
+    - vglist is defined
 
-- include: aix_lvm_modify.yml
+- include_tasks: aix_lvm_modify.yml
   tags: modify
-  when: >
-    manage_lvm and
-    vglist is defined
+  when:
+    - manage_lvm
+    - vglist is defined
 
-- include: aix_lvm_remove.yml
+- include_tasks: aix_lvm_remove.yml
   tags: remove
-  when: >
-    manage_lvm and
-    vglist is defined
+  when:
+    - manage_lvm
+    - vglist is defined
+
+- name: Register that this role has run
+  set_fact: aix_lvm_has_run=true
+  when: aix_lvm_has_run is not defined
