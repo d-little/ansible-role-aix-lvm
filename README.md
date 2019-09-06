@@ -11,6 +11,10 @@ An [Ansible](https://github.com/ansible/ansible) role to manage Volume Groups/Lo
 > * Designed to define a 'whole' environment;  it's not really designed to create ad-hoc LV/FS etc.
 >   * The primary use-case is to define the whole AIX server storage on an initial build.
 > * Does not (*currently?*) handle Remote/NFS mount points.
+> * If you have an 'overmounted' filesystem it will fail as the aix_filesystem module does not create the directory on mount
+>   * ie: /foo/ and /foo/bar/ are both filesystems and created before being mounted
+>   * /foo/ is mounted, and the /foo/bar/ directory is 'gone'
+>   * When attempting to mount /foo/bar/ it will fail as the directory does not exist.
 
 ## Requirements
 
