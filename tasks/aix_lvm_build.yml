@@ -16,6 +16,26 @@
           ( item.state is defined
           and item.state != "absent" ))
 
+  - name: manage_aix_lvm | vary on previously created AIX volume group(s)
+    # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
+    aix_lvg:
+      vg: "{{ item.vgname }}"
+      pvs: "{{ item.disks | join(',') }}"
+      force: "{{ item.force | default( omit ) }}"
+      pp_size: "{{ item.ppsize | default( omit ) }}"
+      state: varyon
+      vg_type: "{{ item.vg_type | default( omit ) }}"
+    become: true
+    loop: "{{ vglist }}"
+    when: >
+          (( item.state is not defined ) or
+          (
+            item.state is defined and
+            item.state != "absent" and
+            item.state != "varyoff"
+          ))
+
+
   - name: manage_aix_lvm | creating new AIX logical volume(s)
     # https://docs.ansible.com/ansible/latest/modules/aix_lvol_module.html#aix-lvol-module
     aix_lvol:
@@ -32,8 +52,12 @@
       - "{{ vglist }}"
       - lvlist
     when: >
-          (( item.1.lvstate is not defined ) or
-          (item.1.lvstate == 'present'))
+          (
+            (
+              ( item.1.lvstate is not defined ) or
+              (item.1.lvstate == 'present')
+            )
+          )
 
   - name: manage_aix_lvm | creating new filesystem on AIX logical volume(s)
     #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
