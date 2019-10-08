@@ -1,97 +1,92 @@
 ---
-- block:
-  - name: manage_aix_lvm | creating new AIX volume group(s)
-    # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
-    aix_lvg:
-      vg: "{{ item.vgname }}"
-      pvs: "{{ item.disks | join(',') }}"
-      force: "{{ item.force | default( omit ) }}"
-      pp_size: "{{ item.ppsize | default( omit ) }}"
-      state: "{{ item.state | default( omit ) }}"
-      vg_type: "{{ item.vg_type | default( omit ) }}"
-    become: true
-    loop: "{{ vglist }}"
-    when: >
-          (( item.state is not defined ) or
-          ( item.state is defined
-          and item.state != "absent" ))
+- name: manage_aix_lvm | creating new AIX volume group(s)
+  # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
+  aix_lvg:
+    vg: "{{ item.vgname }}"
+    pvs: "{{ item.disks | join(',') }}"
+    force: "{{ item.force | default( omit ) }}"
+    pp_size: "{{ item.ppsize | default( omit ) }}"
+    state: "{{ item.state | default( omit ) }}"
+    vg_type: "{{ item.vg_type | default( omit ) }}"
+  become: true
+  loop: "{{ vglist }}"
+  when: >
+        (( item.state is not defined ) or
+        ( item.state is defined
+        and item.state != "absent" ))
 
-  - name: manage_aix_lvm | vary on previously created AIX volume group(s)
-    # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
-    aix_lvg:
-      vg: "{{ item.vgname }}"
-      pvs: "{{ item.disks | join(',') }}"
-      force: "{{ item.force | default( omit ) }}"
-      pp_size: "{{ item.ppsize | default( omit ) }}"
-      state: varyon
-      vg_type: "{{ item.vg_type | default( omit ) }}"
-    become: true
-    loop: "{{ vglist }}"
-    when: >
-          (( item.state is not defined ) or
+- name: manage_aix_lvm | vary on previously created AIX volume group(s)
+  # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
+  aix_lvg:
+    vg: "{{ item.vgname }}"
+    pvs: "{{ item.disks | join(',') }}"
+    force: "{{ item.force | default( omit ) }}"
+    pp_size: "{{ item.ppsize | default( omit ) }}"
+    state: varyon
+    vg_type: "{{ item.vg_type | default( omit ) }}"
+  become: true
+  loop: "{{ vglist }}"
+  when: >
+        (( item.state is not defined ) or
+        (
+          item.state is defined and
+          item.state != "absent" and
+          item.state != "varyoff"
+        ))
+
+- name: manage_aix_lvm | creating new AIX logical volume(s)
+  # https://docs.ansible.com/ansible/latest/modules/aix_lvol_module.html#aix-lvol-module
+  aix_lvol:
+    vg: "{{ item.0.vgname }}"
+    copies: "{{ item.1.lvcopies | default( omit ) }}"
+    lv: "{{ item.1.lvname }}"
+    lv_type: "{{ item.1.lvtype | default( omit ) }}"
+    opts: "{{ item.1.lvopts | default( omit ) }}"
+    pvs: "{{ item.1.lvpvs | default( omit ) }}"
+    size: "{{ item.1.lvsize }}"
+    state: "present"
+  become: true
+  with_subelements:
+    - "{{ vglist }}"
+    - lvlist
+  when: >
+        (
           (
-            item.state is defined and
-            item.state != "absent" and
-            item.state != "varyoff"
-          ))
-
-
-  - name: manage_aix_lvm | creating new AIX logical volume(s)
-    # https://docs.ansible.com/ansible/latest/modules/aix_lvol_module.html#aix-lvol-module
-    aix_lvol:
-      vg: "{{ item.0.vgname }}"
-      copies: "{{ item.1.lvcopies | default( omit ) }}"
-      lv: "{{ item.1.lvname }}"
-      lv_type: "{{ item.1.lvtype | default( omit ) }}"
-      opts: "{{ item.1.lvopts | default( omit ) }}"
-      pvs: "{{ item.1.lvpvs | default( omit ) }}"
-      size: "{{ item.1.lvsize }}"
-      state: "present"
-    become: true
-    with_subelements:
-      - "{{ vglist }}"
-      - lvlist
-    when: >
-          (
-            (
-              ( item.1.lvstate is not defined ) or
-              (item.1.lvstate == 'present')
-            )
+            ( item.1.lvstate is not defined ) or
+            (item.1.lvstate == 'present')
           )
+        )
 
-  - name: manage_aix_lvm | creating new filesystem on AIX logical volume(s)
-    #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
-    aix_filesystem:
-      device: "{{ item.1.lvname }}"
-      filesystem: "{{ item.1.fsfilesystem }}"
-      account_subsystem: "{{ item.1.fsaccount_subsystem | default( omit ) }}"
-      attributes: "{{ item.1.fsattributes | default( omit ) }}"
-      auto_mount: "{{ item.1.fsauto_mount | default( omit ) }}"
-      fs_type: "{{ item.1.lvtype | default( omit ) }}"
-      mount_group: "{{ item.1.fsmount_group | default( omit ) }}"
-      permissions: "{{ item.1.fspermissions | default( omit ) }}"
-      #state: "{{ item.1.fsstate | default( omit ) }}"
-      # aix_filesystem code will not create a filesystem if state: mounted, it only tries to mount it.
-      #  We need to first crate the FS, and then mount it... 
-      state: present
-    become: true
-    with_subelements:
-      - "{{ vglist }}"
-      - lvlist
-    when: >
-          (
-            ( item.1.lvstate is not defined or item.1.lvstate == 'present' )
-              and
-            ( item.1.fsstate is not defined or ( item.1.fsstate == 'present' or item.1.fsstate == 'mounted' ))
-          )
-
-  - name: manage_aix_lvm | Mounting filesystem on AIX logical volume(s)
+- name: manage_aix_lvm | creating new filesystem on AIX logical volume(s)
   #https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
-    aix_filesystem:
-      filesystem: "{{ item.1.fsfilesystem }}"
-      state: mounted
-    become: true
-    with_subelements:
-      - "{{ vglist }}"
-      - lvlist
-    when: item.1.fsstate == 'mounted'
+  aix_filesystem:
+    device: "{{ item.1.lvname }}"
+    filesystem: "{{ item.1.fsfilesystem }}"
+    account_subsystem: "{{ item.1.fsaccount_subsystem | default( omit ) }}"
+    attributes: "{{ item.1.fsattributes | default( omit ) }}"
+    auto_mount: "{{ item.1.fsauto_mount | default( omit ) }}"
+    fs_type: "{{ item.1.lvtype | default( omit ) }}"
+    mount_group: "{{ item.1.fsmount_group | default( omit ) }}"
+    permissions: "{{ item.1.fspermissions | default( omit ) }}"
+    #state: "{{ item.1.fsstate | default( omit ) }}"
+    # aix_filesystem code will not create a filesystem if state: mounted, it only tries to mount it.
+    #  We need to first create the FS, and then mount it... 
+    state: present
+  become: true
+  with_subelements:
+    - "{{ vglist }}"
+    - lvlist
+  when: >
+        (
+          ( item.1.lvstate is not defined or item.1.lvstate == 'present' )
+            and
+          ( item.1.fsstate is not defined or ( item.1.fsstate == 'present' or item.1.fsstate == 'mounted' ))
+        )
+
+- name: manage_aix_lvm | mount filesystems
+  include: aix_lvm_createfs.yml
+  with_subelements:
+    - "{{ vglist }}"
+    - lvlist
+  loop_control:
+    loop_var: lvlist

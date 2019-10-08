@@ -1,0 +1,24 @@
+---
+# This exists because we cannot loop over a block.  We can however loop over an include_tasks
+# This task just creates the mountpoint of a filesystem, and then mounts said filesystem.
+#  We need to do this because of overmounting, ie:
+#   If we have the filesystems (a): /databases/db1/ and (b): /databases/db1/metadata/
+#   When When we mount (a), the mountpoint for (b) will vanish.
+#   So we need to create the directory for the filesystem and then mount it, all one at a time
+
+- name: manage_aix_lvm | Debug lvlist
+  debug:
+    var: lvlist
+    verbosity: 1
+
+- name: manage_aix_lvm | Creating filesystem mounting point (in case of overmounts)
+  file:
+    path: "{{ lvlist.1.fsfilesystem }}"
+    state: directory
+
+- name: manage_aix_lvm | Mounting filesystem on AIX logical volume(s)
+  # https://docs.ansible.com/ansible/latest/modules/aix_filesystem_module.html#aix-filesystem-module
+  aix_filesystem:
+    filesystem: "{{ lvlist.1.fsfilesystem }}"
+    state: mounted
+  when: lvlist.1.fsstate == 'mounted'
