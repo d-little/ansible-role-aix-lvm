@@ -34,6 +34,22 @@
           item.state != "varyoff"
         ))
 
+- name: manage_aix_lvm | Re-scan VGs for disk changes (chvg -g)
+  # https://docs.ansible.com/ansible/latest/modules/aix_lvg_module.html#aix-lvg-module
+  command: (chvg -g {{ item.vgname }} 2>/dev/null) && echo 'changed' || echo 'nochange'
+  become: true
+  loop: "{{ vglist }}"
+  when: >
+        (( item.state is not defined ) or
+        (
+          item.state is defined and
+          item.state != "absent" and
+          item.state != "varyoff"
+        ))
+  register: chvg_g
+  failed_when: no
+  changed_when: authent_order.stdout == 'changed'
+
 - name: manage_aix_lvm | creating new AIX logical volume(s)
   # https://docs.ansible.com/ansible/latest/modules/aix_lvol_module.html#aix-lvol-module
   aix_lvol:
