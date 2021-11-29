@@ -10,6 +10,7 @@
   debug:
     var: lvlist
     verbosity: 1
+  when: ansible_verbosity >= 1
 
 - name: manage_aix_lvm | Creating filesystem mounting point (in case of overmounts)
   file:
