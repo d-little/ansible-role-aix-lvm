@@ -1,10 +1,12 @@
 ---
-# defaults file for ansible-manage-lvm.  Please do not change these values, use your local environment variables files instead
-lvm_groups: []
+# defaults file for SHUSA ansible_role_soe_storage.
+# Please do not change these values, use your local environment variables files instead
 
 # Defines if LVM will be managed by role
 # default is false to ensure nothing is changed by accident.
 manage_lvm: false
 
-default_force: False
-default_fs: jfs2
+##
+storage_defaults:
+  force: false
+  fs: jfs2
